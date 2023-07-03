@@ -14,7 +14,8 @@ def get(session, url, **kwargs):
 def post(session, url, **kwargs):
     try:
         response = session.post(url, **kwargs)
-        response.raise_for_status()
+        # the line below generates an error in some sharepoint accounts
+        # response.raise_for_status()
         return response
     except requests.exceptions.RequestException as err:
         raise ShareplumRequestError("Shareplum HTTP Post Failed", err)
