@@ -10,8 +10,14 @@ class _Folder():
         self.site_url = url
         self.timeout = timeout
 
-        self.info = self._create_folder()
-        self._escaped_relative_url = self._escape_name(self.info['d']['ServerRelativeUrl'])
+        # Original shareplum created folders every single time we connected to a folder. We don't want that.
+        #self.info = self._create_folder()
+        # Instead we get the info using proper REST API
+        self.info = get(self._session, self.site_url + f"/_api/web/GetFolderByServerRelativeUrl('{self._escaped_folder_name}')").json()
+
+        # since self.info has a different format now, we need to change the reference to 'ServerRelativeUrl'
+        #self._escaped_relative_url = self._escape_name(self.info['d']['ServerRelativeUrl'])
+        self._escaped_relative_url = self._escape_name(self.info['ServerRelativeUrl'])
 
     @property
     def contextinfo(self):
@@ -105,5 +111,6 @@ class _Folder():
         return response.content
     
     def get_file_properties(self, file_name):
-        file_properties= get(self._session, self.site_url + f"/_api/web/GetFileByServerRelativeUrl('{self.info['d']['ServerRelativeUrl']}/{file_name}')?/$expand=ListItemAllFields")
+        # since self.info has a different format now, we changed the reference to 'ServerRelativeUrl' in this shareplum mod
+        file_properties= get(self._session, self.site_url + f"/_api/web/GetFileByServerRelativeUrl('{self.info['ServerRelativeUrl']}/{file_name}')?/$expand=ListItemAllFields")
         return file_properties.json()
